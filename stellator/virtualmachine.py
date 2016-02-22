@@ -7,7 +7,7 @@ import os
 
 from stellator.constants import *
 from stellator.fileparser import VMWareConfigFileParser, IndexedConfigEntry, FileParserError
-
+from stellator.util import arp_resolve_ip_address
 
 class VirtualMachineConfigurationSection(IndexedConfigEntry):
     """Common dot separated config section
@@ -64,6 +64,15 @@ class Interface(VirtualMachineConfigurationSection):
         if not hasattr(self, 'start_connected'):
             return False
         return self.start_connected
+
+    @property
+    def ip_address(self):
+        """Resolve IP
+
+        Returns IP address from ARP table or None
+        """
+        return arp_resolve_ip_address(self.mac_address)
+
 
 class PCIBridge(VirtualMachineConfigurationSection):
     """PCI bridge

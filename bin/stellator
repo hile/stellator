@@ -109,13 +109,15 @@ class DetailsCommand(VMWareCommand):
 
             self.message('\n  Network Interfaces')
             for interface in virtualmachine.interfaces:
-                self.message('    {0} {1:11} {2:8} {3:8} {4:10} {5}'.format(
+                ipaddress = interface.ip_address
+                self.message('    {0} {1:11} {2:8} {3:8} {4:10} {5} {6}'.format(
                     interface.index,
                     interface.autoconnect == True and 'autoconnect' or 'manual',
                     interface.connection_type,
                     interface.driver,
                     interface.address_type,
                     interface.mac_address,
+                    ipaddress is not None and ipaddress or '',
                 ))
 
             if virtualmachine.description:
