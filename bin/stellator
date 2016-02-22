@@ -3,6 +3,7 @@
 from systematic.shell import Script, ScriptCommand
 
 from stellator.config import StellatorConfig, StellatorConfigError, DEFAULT_CONFIG_PATH
+from stellator.constants import VMX_DETAILS_DESCRIPTIONS
 from stellator.inventory import VirtualMachineFinder
 
 class VMWareCommand(ScriptCommand):
@@ -87,6 +88,43 @@ class StatusCommand(VMWareCommand):
                 virtualmachine.headless and 'headless' or 'gui',
             ))
 
+class DetailsCommand(VMWareCommand):
+    def run(self, args):
+        args = self.parse_args(args)
+
+        # Add empty before first VM
+        self.message('')
+
+        for virtualmachine in args.virtualmachines:
+            self.message('{0}'.format(virtualmachine.name))
+            for detail in VMX_DETAILS_DESCRIPTIONS:
+                label = detail[1]
+                value = getattr(virtualmachine, detail[0])
+                units = len(detail) > 2 and detail[2] or ''
+                if isinstance(value, bool):
+                    value = value == True and 'Enabled' or 'Disabled'
+                if value is None:
+                    value = 'not available'
+                self.message('  {0:30} {1}{2}'.format(label, value, units) )
+
+            self.message('\n  Network Interfaces')
+            for interface in virtualmachine.interfaces:
+                self.message('    {0} {1:11} {2:8} {3:8} {4:10} {5}'.format(
+                    interface.index,
+                    interface.autoconnect == True and 'autoconnect' or 'manual',
+                    interface.connection_type,
+                    interface.driver,
+                    interface.address_type,
+                    interface.mac_address,
+                ))
+
+            if virtualmachine.description:
+                description = '\n  '.join(virtualmachine.description.splitlines())
+                self.message('\n  Description:\n\n  {0}'.format(description))
+
+            # Add empty line between VMs
+            self.message('')
+
 
 script = Script()
 script.add_argument('--config', default=DEFAULT_CONFIG_PATH, help='Virtual machine directory')
@@ -107,6 +145,9 @@ c.add_argument('--autoresume', action='store_true', help='Set autoresume flag')
 c.add_argument('patterns', nargs='*', help='VM name patterns')
 
 c = script.add_subcommand(StatusCommand('status', 'Show status of VMs'))
+c.add_argument('patterns', nargs='*', help='VM name patterns')
+
+c = script.add_subcommand(DetailsCommand('details', 'Show VM details'))
 c.add_argument('patterns', nargs='*', help='VM name patterns')
 
 args = script.parse_args()

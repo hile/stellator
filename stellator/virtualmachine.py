@@ -59,6 +59,12 @@ class Interface(VirtualMachineConfigurationSection):
         'pciSlotNumber': 'pci_slot_number',
     }
 
+    @property
+    def autoconnect(self):
+        if not hasattr(self, 'start_connected'):
+            return False
+        return self.start_connected
+
 class PCIBridge(VirtualMachineConfigurationSection):
     """PCI bridge
 
@@ -122,6 +128,13 @@ class VirtualMachine(VMWareConfigFileParser):
 
     def __cmp__(self, other):
         return cmp(self.path, other.path)
+
+    @property
+    def description(self):
+        value = self.annotation
+        if value is None:
+            return ''
+        return '\n'.join(value.split('|0A'))
 
     @property
     def directory(self):
