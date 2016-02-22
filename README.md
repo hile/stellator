@@ -6,6 +6,18 @@ This python module contains scripts for OS X to discover and manage
 VMware Fusion virtual machines, escpecially VMs running in headless
 mode that can't be controller directly by VMWare Fusion GUI.
 
+This code can be installed normally with pip:
+
+    pip install stellator
+
+Pip install does not currently include the files from examples directory.
+
+Running
+-------
+
+There is just one script called 'stellator' installed to your path. See --help
+arguments what it can do.
+
 Configuring for headless VM reboot suspend/resume
 =================================================
 
