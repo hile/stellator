@@ -1,0 +1,5 @@
+{
+  Description     = "StellatorHeadless";
+  Provides        = ("Suspend and resume running VMWare Fusion headless virtualmachines OS X Startup/Shutdown");
+  Uses            = ("Disks");
+}

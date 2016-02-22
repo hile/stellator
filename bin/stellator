@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+
+from systematic.shell import Script, ScriptCommand
+
+from stellator.config import StellatorConfig, StellatorConfigError, DEFAULT_CONFIG_PATH
+from stellator.inventory import VirtualMachineFinder
+
+class VMWareCommand(ScriptCommand):
+    def parse_args(self, args):
+        self.config = StellatorConfig(args.config)
+        self.finder = VirtualMachineFinder(self.config)
+
+        if 'patterns' in args:
+            if args.patterns:
+                args.virtualmachines = self.finder.match_vm_names(
+                    [pattern for arg in args.patterns for pattern in arg.split(',')]
+                )
+            else:
+                args.virtualmachines = [vm for vm in self.finder]
+
+        return args
+
+
+class ListCommand(VMWareCommand):
+    def run(self, args):
+        args = self.parse_args(args)
+
+        for virtualmachine in self.finder:
+            self.message('{0}'.format(virtualmachine.path))
+
+
+class StartCommand(VMWareCommand):
+    def run(self, args):
+        args = self.parse_args(args)
+
+        for virtualmachine in args.virtualmachines:
+            if not self.finder.is_running(virtualmachine):
+                self.message('start {0}'.format(virtualmachine))
+                virtualmachine.start()
+
+
+class AutoResumeCommand(VMWareCommand):
+    def run(self, args):
+        args = self.parse_args(args)
+
+        for virtualmachine in args.virtualmachines:
+            if not virtualmachine.headless or not virtualmachine.autoresume:
+                continue
+
+            if not self.finder.is_running(virtualmachine):
+                self.message('resume {0}'.format(virtualmachine))
+                virtualmachine.start()
+
+class StopCommand(VMWareCommand):
+    def run(self, args):
+        args = self.parse_args(args)
+
+        for virtualmachine in args.virtualmachines:
+            if self.finder.is_running(virtualmachine):
+                self.message('stop {0}'.format(virtualmachine))
+                virtualmachine.stop()
+
+
+class SuspendCommand(VMWareCommand):
+    def run(self, args):
+        args = self.parse_args(args)
+
+        if not args.patterns and args.autoresume:
+            args.virtualmachines = [vm for vm in args.virtualmachines if vm.headless]
+
+        for virtualmachine in args.virtualmachines:
+            if self.finder.is_running(virtualmachine):
+                self.message('suspend {0}'.format(virtualmachine))
+                virtualmachine.suspend(autoresume=args.autoresume)
+
+
+class StatusCommand(VMWareCommand):
+    def run(self, args):
+        args = self.parse_args(args)
+
+        for virtualmachine in args.virtualmachines:
+            self.message('{0:12} {1:9} {2:3} CPUs {3:5} MB memory {4}'.format(
+                virtualmachine.name,
+                virtualmachine.status,
+                virtualmachine.cores,
+                virtualmachine.memory,
+                virtualmachine.headless and 'headless' or 'gui',
+            ))
+
+
+script = Script()
+script.add_argument('--config', default=DEFAULT_CONFIG_PATH, help='Virtual machine directory')
+
+c = script.add_subcommand(ListCommand('list', 'List VMs'))
+
+c = script.add_subcommand(StartCommand('start', 'Start VM'))
+c.add_argument('patterns', nargs='*', help='VM name patterns')
+
+c = script.add_subcommand(StopCommand('stop', 'Stop VM'))
+c.add_argument('patterns', nargs='*', help='VM name patterns')
+
+c = script.add_subcommand(AutoResumeCommand('resume', 'Autoresume headless VMs'))
+c.add_argument('patterns', nargs='*', help='VM name patterns')
+
+c = script.add_subcommand(SuspendCommand('suspend', 'Suspend VM'))
+c.add_argument('--autoresume', action='store_true', help='Set autoresume flag')
+c.add_argument('patterns', nargs='*', help='VM name patterns')
+
+c = script.add_subcommand(StatusCommand('status', 'Show status of VMs'))
+c.add_argument('patterns', nargs='*', help='VM name patterns')
+
+args = script.parse_args()
