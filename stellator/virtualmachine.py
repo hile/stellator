@@ -107,6 +107,39 @@ class USB(VirtualMachineConfigurationSection):
         super(USB, self).__init__(virtualmachine, index)
         self.interfaces = []
 
+class Share(VirtualMachineConfigurationSection):
+    """Mapped shared folder
+
+    """
+    boolean_keys = ( 'enabled', 'present', 'readAccess', 'writeAccess', )
+    key_map = {
+        'hostPath':     'host_path',
+        'guestName':    'guest_folder_name',
+        'readAccess':   'guest_read_access',
+        'writeAccess':  'guest_write_access',
+    }
+
+
+class SharedFolders(VirtualMachineConfigurationSection):
+    """Shared folder configuration
+
+    """
+    def __init__(self, virtualmachine, index=0):
+        super(SharedFolders, self).__init__(virtualmachine, index)
+        self.shares = []
+
+    integer_keys = ( 'maxNum', )
+    key_map = { 'maxNum': 'max_number', }
+
+
+class VMCI(VirtualMachineConfigurationSection):
+    """VMCI
+
+    """
+    integer_keys = ( 'pciSlotNumber', )
+    boolean_keys = ( 'present', )
+    key_map = { 'pciSlotNumber': 'pci_slot_number', }
+
 
 class VirtualMachine(VMWareConfigFileParser):
     """Vmware .vmx parser
@@ -127,8 +160,11 @@ class VirtualMachine(VMWareConfigFileParser):
 
         self.interfaces = []
         self.pci_bridges = []
-        self.usb = USB(self)
+        self.vmci_interfaces = []
         self.blockdevices = []
+
+        self.shared_folders = SharedFolders(self)
+        self.usb = USB(self)
 
         self.load()
 
@@ -269,6 +305,15 @@ class VirtualMachine(VMWareConfigFileParser):
         self.interfaces.append(interface)
         return interface
 
+    def __get_vmci__(self, index):
+        for vmci in self.vmci_interfaces:
+            if vmci == index:
+                return vmci
+
+        vmci = VMCI(self, index)
+        self.vmci_interfaces.append(vmci)
+        return vmci
+
     def __get_pci_bridge__(self, index):
         for bridge in self.pci_bridges:
             if bridge == index:
@@ -286,6 +331,15 @@ class VirtualMachine(VMWareConfigFileParser):
         interface = USBPort(self, index)
         self.usb.interfaces.append(interface)
         return interface
+
+    def __get_share__(self, index):
+        for share in self.shared_folders.shares:
+            if share.index == index:
+                return share
+
+        share = Share(self, index)
+        self.shared_folders.shares.append(share)
+        return share
 
     def parse_value(self, key, value):
         """Parse values
@@ -311,6 +365,12 @@ class VirtualMachine(VMWareConfigFileParser):
             if parts[0] == 'usb':
                 self.usb.set(parts[1:], value)
 
+            elif parts[0][:4] == 'vmci':
+                index = int(parts[0][4:])
+                parts = parts[1:]
+                vmci = self.__get_vmci__(index)
+                vmci.set(parts, value)
+
             elif parts[0][:8] == 'ethernet':
                 index = int(parts[0][8:])
                 parts = parts[1:]
@@ -330,6 +390,18 @@ class VirtualMachine(VMWareConfigFileParser):
                     usb = self.__get_usb_interface__(index)
                     usb.set(parts, value)
                 except ValueError:
+                    print parts
+
+            elif key == 'sharedFolder.maxNum':
+                self.shared_folders.count = value
+
+            elif parts[0][:12] == 'sharedFolder':
+                try:
+                    index = int(parts[0][12:])
+                    parts = parts[1:]
+                    share = self.__get_share__(index)
+                    share.set(parts, value)
+                except ValueError, emsg:
                     print parts
 
             else:

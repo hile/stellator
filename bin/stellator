@@ -120,6 +120,16 @@ class DetailsCommand(VMWareCommand):
                     ipaddress is not None and ipaddress or '',
                 ))
 
+            if virtualmachine.shared_folders.shares:
+                self.message('\n  Shared Folders')
+                for share in virtualmachine.shared_folders.shares:
+                    self.message('    {0:12} {1:8} {2:8} {3}'.format(
+                        share.guest_folder_name,
+                        share.enabled and 'enabled' or 'disabled',
+                        share.guest_write_access and 'writable' or '',
+                        share.host_path,
+                    ))
+
             if virtualmachine.description:
                 description = '\n  '.join(virtualmachine.description.splitlines())
                 self.message('\n  Description:\n\n  {0}'.format(description))
