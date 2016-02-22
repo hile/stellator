@@ -15,11 +15,11 @@ script accordingly if this is not the case.
 Example configuration in examples/StartupItems can be used to configure automatic suspend
 and resume of headless VMs during reboots with:
 
-sudo install -d /Library/StartupItems/StellatorHeadless
-sudo cp examples/StartupItems/StellatorHeadless/* /Library/StartupItems/StellatorHeadless/
-sudo chown -R root:root /Library/StartupItems/StellatorHeadless/*
-sudo chmod 0644 /Library/StartupItems/StellatorHeadless/StartupParameters.plist
-sudo chmod 0755 /Library/StartupItems/StellatorHeadless/StellatorHeadless.sh
+    sudo install -d /Library/StartupItems/StellatorHeadless
+    sudo cp examples/StartupItems/StellatorHeadless/* /Library/StartupItems/StellatorHeadless/
+    sudo chown -R root:root /Library/StartupItems/StellatorHeadless/*
+    sudo chmod 0644 /Library/StartupItems/StellatorHeadless/StartupParameters.plist
+    sudo chmod 0755 /Library/StartupItems/StellatorHeadless/StellatorHeadless.sh
 
 Naming and Credits
 ==================
