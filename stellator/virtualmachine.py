@@ -59,6 +59,10 @@ class Interface(VirtualMachineConfigurationSection):
         'pciSlotNumber': 'pci_slot_number',
     }
 
+    def __init__(self, *args, **kwargs):
+        super(Interface, self).__init__(*args, **kwargs)
+        self.driver = 'unknown'
+
     @property
     def autoconnect(self):
         if not hasattr(self, 'start_connected'):
