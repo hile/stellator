@@ -44,9 +44,9 @@ class VMWareConfigFileParser(object):
                 for line in sorted(line.strip() for line in fd.readlines()):
                     self.parse_line(line)
         except OSError, (ecode, emsg):
-            raise ConfigFileError('Error reading {0}: (1}'.format(self.path, emsg))
+            raise FileParserError('Error reading {0}: {1}'.format(self.path, emsg))
         except IOError, (ecode, emsg):
-            raise ConfigFileError('Error reading {0}: (1}'.format(self.path, emsg))
+            raise FileParserError('Error reading {0}: {1}'.format(self.path, emsg))
 
     def parse_line(self, line):
         """Split key, value line

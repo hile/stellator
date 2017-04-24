@@ -7,7 +7,7 @@ import os
 
 from stellator.constants import *
 from stellator.fileparser import VMWareConfigFileParser, IndexedConfigEntry, FileParserError
-from stellator.virtualmachine import VirtualMachine
+from stellator.virtualmachine import VirtualMachine, VirtualMachineError
 from stellator.vmrun import VMRunWrapper, VMRunError
 
 
@@ -99,6 +99,7 @@ class InventoryVirtualMachine(IndexedConfigEntry):
 
         self.inventory = inventory
         self.vmx_path = None
+        self.virtual_folder = False
 
         self.config = {
             'name': 'unknown',
@@ -130,8 +131,15 @@ class InventoryVirtualMachine(IndexedConfigEntry):
         elif key in INVENTORY_VM_KEY_MAP:
             self.config[INVENTORY_VM_KEY_MAP[key]] = value
 
+        elif key == 'Type' and value == '2':
+            self.virtual_folder = True
+
+        elif key == 'Expanded':
+            # Virtual folder state, not intresting
+            pass
+
         else:
-            print self, key, value
+            print 'unknown key', self, key, value
 
 
 class Inventory(VMWareConfigFileParser):
@@ -175,6 +183,8 @@ class Inventory(VMWareConfigFileParser):
         for vm in [vm for vm in self.vmx_configs]:
             if vm.vmx_path is None:
                 self.vmx_configs.remove(vm)
+            if vm.virtual_folder:
+                self.vmx_configs.remove(vm)
         self.vmx_configs.sort()
 
     @property
@@ -183,7 +193,14 @@ class Inventory(VMWareConfigFileParser):
 
         Return VMs matching the inventory config
         """
-        return [vm.virtualmachine for vm in self.vmx_configs]
+        virtualmachines = []
+        for config in self.vmx_configs:
+            try:
+                virtualmachines.append(config.virtualmachine)
+            except VirtualMachineError as e:
+                print 'Error loading {0}: {1}'.format(config, e)
+                pass
+        return virtualmachines
 
     def update_running_vmx(self):
         """Update list of running VMs

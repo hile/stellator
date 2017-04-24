@@ -9,6 +9,11 @@ from stellator.constants import *
 from stellator.fileparser import VMWareConfigFileParser, IndexedConfigEntry, FileParserError
 from stellator.util import arp_resolve_ip_address
 
+
+class VirtualMachineError(Exception):
+    pass
+
+
 class VirtualMachineConfigurationSection(IndexedConfigEntry):
     """Common dot separated config section
 
@@ -170,7 +175,10 @@ class VirtualMachine(VMWareConfigFileParser):
         self.shared_folders = SharedFolders(self)
         self.usb = USB(self)
 
-        self.load()
+        try:
+            self.load()
+        except FileParserError as e:
+            raise VirtualMachineError('Error loading {0}: {1}'.format(self.path, e))
 
     def __repr__(self):
         return self.path
