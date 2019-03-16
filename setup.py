@@ -1,5 +1,4 @@
 
-import glob
 from setuptools import setup, find_packages
 from stellator import __version__
 

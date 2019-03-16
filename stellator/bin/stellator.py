@@ -2,9 +2,10 @@
 
 from systematic.shell import Script, ScriptCommand
 
-from stellator.config import StellatorConfig, StellatorConfigError, DEFAULT_CONFIG_PATH
+from stellator.config import StellatorConfig, DEFAULT_CONFIG_PATH
 from stellator.constants import VMX_DETAILS_DESCRIPTIONS
 from stellator.inventory import VirtualMachineFinder
+
 
 class VMWareCommand(ScriptCommand):
     def parse_args(self, args):
@@ -52,6 +53,7 @@ class AutoResumeCommand(VMWareCommand):
                 self.message('resume {0}'.format(virtualmachine))
                 virtualmachine.start()
 
+
 class StopCommand(VMWareCommand):
     def run(self, args):
         args = self.parse_args(args)
@@ -88,6 +90,7 @@ class StatusCommand(VMWareCommand):
                 virtualmachine.headless and 'headless' or 'gui',
             ))
 
+
 class DetailsCommand(VMWareCommand):
     def run(self, args):
         args = self.parse_args(args)
@@ -102,17 +105,17 @@ class DetailsCommand(VMWareCommand):
                 value = getattr(virtualmachine, detail[0])
                 units = len(detail) > 2 and detail[2] or ''
                 if isinstance(value, bool):
-                    value = value == True and 'Enabled' or 'Disabled'
+                    value = value is True and 'Enabled' or 'Disabled'
                 if value is None:
                     value = 'not available'
-                self.message('  {0:30} {1}{2}'.format(label, value, units) )
+                self.message('  {0:30} {1}{2}'.format(label, value, units))
 
             self.message('\n  Network Interfaces')
             for interface in virtualmachine.interfaces:
                 ipaddress = interface.ip_address
                 self.message('    {0} {1:11} {2:8} {3:8} {4:10} {5} {6}'.format(
                     interface.index,
-                    interface.autoconnect == True and 'autoconnect' or 'manual',
+                    interface.autoconnect is True and 'autoconnect' or 'manual',
                     interface.connection_type,
                     interface.driver,
                     interface.address_type,
@@ -163,7 +166,7 @@ def main():
     c = script.add_subcommand(DetailsCommand('details', 'Show VM details'))
     c.add_argument('patterns', nargs='*', help='VM name patterns')
 
-    args = script.parse_args()
+    script.parse_args()
 
 
 if __name__ == '__main__':
