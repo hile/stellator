@@ -5,9 +5,18 @@ Virtual machine configuration
 import glob
 import os
 
-from stellator.constants import *
-from stellator.fileparser import VMWareConfigFileParser, IndexedConfigEntry, FileParserError
-from stellator.util import arp_resolve_ip_address
+from .constants import (
+    VMX_KEY_MAP,
+    VMX_INTEGER_KEYS,
+    VMX_BOOLEAN_KEYS,
+)
+from .fileparser import (
+    VMWareConfigFileParser,
+    IndexedConfigEntry,
+    FileParserError
+)
+from .util import arp_resolve_ip_address
+from .vmrun import VMRunError
 
 
 class VirtualMachineError(Exception):
@@ -24,7 +33,7 @@ class VirtualMachineConfigurationSection(IndexedConfigEntry):
     key_map = {}
 
     def __init__(self, virtualmachine, index):
-        super(VirtualMachineConfigurationSection, self).__init__(index)
+        super().__init__(index)
         self.virtualmachine = virtualmachine
 
     def set(self, parts, value):
@@ -51,9 +60,9 @@ class Interface(VirtualMachineConfigurationSection):
 
     Virtualmachine Ethernet network interface
     """
-    integer_keys = ( 'pciSlotNumber', 'generatedAddressOffset', )
-    boolean_keys = ( 'present', 'startConnected', 'wakeOnPcktRcv', )
-    key_map =  {
+    integer_keys = ('pciSlotNumber', 'generatedAddressOffset',)
+    boolean_keys = ('present', 'startConnected', 'wakeOnPcktRcv',)
+    key_map = {
         'virtualDev': 'driver',
         'connectionType': 'connection_type',
         'startConnected': 'start_connected',
@@ -65,7 +74,7 @@ class Interface(VirtualMachineConfigurationSection):
     }
 
     def __init__(self, *args, **kwargs):
-        super(Interface, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.driver = 'unknown'
 
     @property
@@ -88,9 +97,12 @@ class PCIBridge(VirtualMachineConfigurationSection):
 
     Virtualmachine PCI bridge
     """
-    integer_keys = ( 'pciSlotNumber', 'functions', )
-    boolean_keys = ( 'present', )
-    key_map =  { 'virtualDev': 'virtual_device', 'pciSlotNumber': 'pci_slot_number', }
+    integer_keys = ('pciSlotNumber', 'functions',)
+    boolean_keys = ('present',)
+    key_map = {
+        'virtualDev': 'virtual_device',
+        'pciSlotNumber': 'pci_slot_number',
+    }
 
 
 class USBPort(VirtualMachineConfigurationSection):
@@ -98,9 +110,11 @@ class USBPort(VirtualMachineConfigurationSection):
 
     Virtualmachine USB port attached
     """
-    integer_keys = ( 'parent', 'speed', 'port', )
-    boolean_keys = ( 'present', )
-    key_map = { 'deviceType': 'device_type', }
+    integer_keys = ('parent', 'speed', 'port',)
+    boolean_keys = ('present',)
+    key_map = {
+        'deviceType': 'device_type',
+    }
 
 
 class USB(VirtualMachineConfigurationSection):
@@ -108,24 +122,27 @@ class USB(VirtualMachineConfigurationSection):
 
     Section for USB support in VMs. Contains USBPort objects as well.
     """
-    integer_keys = ( 'pciSlotNumber', )
-    boolean_keys = ( 'present', )
-    key_map = { 'pciSlotNumber': 'pci_slot_number', }
+    integer_keys = ('pciSlotNumber',)
+    boolean_keys = ('present',)
+    key_map = {
+        'pciSlotNumber': 'pci_slot_number',
+    }
 
     def __init__(self, virtualmachine, index=0):
-        super(USB, self).__init__(virtualmachine, index)
+        super().__init__(virtualmachine, index)
         self.interfaces = []
+
 
 class Share(VirtualMachineConfigurationSection):
     """Mapped shared folder
 
     """
-    boolean_keys = ( 'enabled', 'present', 'readAccess', 'writeAccess', )
+    boolean_keys = ('enabled', 'present', 'readAccess', 'writeAccess',)
     key_map = {
-        'hostPath':     'host_path',
-        'guestName':    'guest_folder_name',
-        'readAccess':   'guest_read_access',
-        'writeAccess':  'guest_write_access',
+        'hostPath': 'host_path',
+        'guestName': 'guest_folder_name',
+        'readAccess': 'guest_read_access',
+        'writeAccess': 'guest_write_access',
     }
 
 
@@ -134,20 +151,24 @@ class SharedFolders(VirtualMachineConfigurationSection):
 
     """
     def __init__(self, virtualmachine, index=0):
-        super(SharedFolders, self).__init__(virtualmachine, index)
+        super().__init__(virtualmachine, index)
         self.shares = []
 
-    integer_keys = ( 'maxNum', )
-    key_map = { 'maxNum': 'max_number', }
+    integer_keys = ('maxNum',)
+    key_map = {
+        'maxNum': 'max_number',
+    }
 
 
 class VMCI(VirtualMachineConfigurationSection):
     """VMCI
 
     """
-    integer_keys = ( 'pciSlotNumber', )
-    boolean_keys = ( 'present', )
-    key_map = { 'pciSlotNumber': 'pci_slot_number', }
+    integer_keys = ('pciSlotNumber',)
+    boolean_keys = ('present',)
+    key_map = {
+        'pciSlotNumber': 'pci_slot_number',
+    }
 
 
 class VirtualMachine(VMWareConfigFileParser):
@@ -156,7 +177,7 @@ class VirtualMachine(VMWareConfigFileParser):
     Parse .vmx file and give some functionality to control the VM.
     """
     def __init__(self, inventory, path):
-        super(VirtualMachine, self).__init__(path)
+        super().__init__(path)
 
         self.inventory = inventory
 
@@ -183,8 +204,23 @@ class VirtualMachine(VMWareConfigFileParser):
     def __repr__(self):
         return self.path
 
-    def __cmp__(self, other):
-        return cmp(self.path, other.path)
+    def __eq__(self, other):
+        return self.path == other.path
+
+    def __ne__(self, other):
+        return self.path != other.path
+
+    def __lt__(self, other):
+        return self.path < other.path
+
+    def __gt__(self, other):
+        return self.path > other.path
+
+    def __le__(self, other):
+        return self.path <= other.path
+
+    def __ge__(self, other):
+        return self.path >= other.path
 
     @property
     def description(self):
@@ -214,11 +250,12 @@ class VirtualMachine(VMWareConfigFileParser):
         """Is VM running
 
         """
+
         try:
             running_vms = self.inventory.vmrun.running_vms()
-        except VMRunError, emsg:
+        except VMRunError as e:
             # TODO - maybe we want something else here?
-            raise VMRunError(emsg)
+            raise VirtualMachineError(e)
 
         return self.path in running_vms
 
@@ -272,9 +309,7 @@ class VirtualMachine(VMWareConfigFileParser):
         if os.path.isfile(self.autoresume_file):
             try:
                 os.unlink(self.autoresume_file)
-            except OSError, (ecode, emsg):
-                pass
-            except OSError, (ecode, emsg):
+            except OSError:
                 pass
 
     def suspend(self, autoresume=False):
@@ -293,9 +328,7 @@ class VirtualMachine(VMWareConfigFileParser):
         if autoresume and self.headless:
             try:
                 open(self.autoresume_file, 'w').write('\n')
-            except OSError, (ecode, emsg):
-                pass
-            except OSError, (ecode, emsg):
+            except OSError:
                 pass
 
     def stop(self):
@@ -358,7 +391,7 @@ class VirtualMachine(VMWareConfigFileParser):
 
         Right now we skip most keys: implement rest if you are interested.
         """
-        if super(VirtualMachine, self).parse_value(key, value):
+        if super().parse_value(key, value):
             return
 
         if key in VMX_BOOLEAN_KEYS:
@@ -401,8 +434,8 @@ class VirtualMachine(VMWareConfigFileParser):
                     parts = parts[1:]
                     usb = self.__get_usb_interface__(index)
                     usb.set(parts, value)
-                except ValueError:
-                    print parts
+                except ValueError as e:
+                    print(parts, e)
 
             elif key == 'sharedFolder.maxNum':
                 self.shared_folders.count = value
@@ -413,10 +446,10 @@ class VirtualMachine(VMWareConfigFileParser):
                     parts = parts[1:]
                     share = self.__get_share__(index)
                     share.set(parts, value)
-                except ValueError, emsg:
-                    print parts
+                except ValueError as e:
+                    print(parts, e)
 
             else:
                 pass
                 # TODO - parse rest of options: these are not really interesting
-                #print '{0}\n  {1} {2}'.format(key, type(value), value)
+                # print '{0}\n  {1} {2}'.format(key, type(value), value)

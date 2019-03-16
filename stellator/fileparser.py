@@ -4,7 +4,8 @@ Generic parsers for vmware configuration text files
 
 import numbers
 
-from stellator.constants import *
+from .constants import CONFIG_META_KEYS
+
 
 class FileParserError(Exception):
     pass
@@ -19,14 +20,31 @@ class IndexedConfigEntry(object):
     def __init__(self, index):
         self.index = int(index)
 
-    def __cmp__(self, other):
+    def __get_index_value__(self, other):
         if isinstance(other, numbers.Number):
-            return cmp(self.index, other)
+            return other
+        elif isinstance(other.index, str):
+            return int(other)
+        else:
+            return other.index
 
-        if isinstance(other, basestring):
-            return cmp(self.index, int(other))
+    def __eq__(self, other):
+        return self.index == self.__get_index_value__(other)
 
-        return cmp(self.index, other.index)
+    def __ne__(self, other):
+        return self.index != self.__get_index_value__(other)
+
+    def __lt__(self, other):
+        return self.index < self.__get_index_value__(other)
+
+    def __gt__(self, other):
+        return self.index > self.__get_index_value__(other)
+
+    def __le__(self, other):
+        return self.index <= self.__get_index_value__(other)
+
+    def __ge__(self, other):
+        return self.index >= self.__get_index_value__(other)
 
 
 class VMWareConfigFileParser(object):
@@ -43,10 +61,10 @@ class VMWareConfigFileParser(object):
             with open(self.path, 'r') as fd:
                 for line in sorted(line.strip() for line in fd.readlines()):
                     self.parse_line(line)
-        except OSError, (ecode, emsg):
-            raise FileParserError('Error reading {0}: {1}'.format(self.path, emsg))
-        except IOError, (ecode, emsg):
-            raise FileParserError('Error reading {0}: {1}'.format(self.path, emsg))
+        except OSError as e:
+            raise FileParserError('Error reading {0}: {1}'.format(self.path, e))
+        except IOError as e:
+            raise FileParserError('Error reading {0}: {1}'.format(self.path, e))
 
     def parse_line(self, line):
         """Split key, value line

@@ -7,6 +7,7 @@ from subprocess import Popen, PIPE
 
 VMRUN_RELATIVE_PATH = 'Contents/Library/vmrun'
 
+
 class VMRunError(Exception):
     pass
 
@@ -26,6 +27,8 @@ class VMRunWrapper(object):
         command = [self.path] + args
         p = Popen(command, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
+        stdout = str(stdout, 'utf-8')
+        stderr = str(stderr, 'utf-8')
         return p.returncode, stdout, stderr
 
     def running_vms(self):
@@ -55,4 +58,3 @@ class VMRunWrapper(object):
 
         if rv != 0:
             raise VMRunError('Error stopping {0}: {1}'.format(vmx_path, stderr))
-

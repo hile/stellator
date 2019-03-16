@@ -15,6 +15,7 @@ VMWARE_FUSION_PATHS = (
     '/Applications/VMware Fusion.app',
 )
 
+
 def detect_vmware_fusion():
     for path in VMWARE_FUSION_PATHS:
         if os.path.isdir(path):
@@ -69,14 +70,12 @@ class StellatorConfig(dict):
         if not os.path.isdir(CONFIG_DIRECTORY):
             try:
                 os.makedirs(CONFIG_DIRECTORY)
-            except OSError, (ecode, emsg):
-                raise StellatorConfigError('Error creating directory {0}: {1}'.format(CONFIG_DIRECTORY, emsg))
-            except IOError, (ecode, emsg):
-                raise StellatorConfigError('Error creating directory {0}: {1}'.format(CONFIG_DIRECTORY, emsg))
+            except OSError as e:
+                raise StellatorConfigError('Error creating directory {}: {}'.format(CONFIG_DIRECTORY, e))
+            except IOError as e:
+                raise StellatorConfigError('Error creating directory {}: {}'.format(CONFIG_DIRECTORY, e))
 
         config = configobj.ConfigObj(self.path)
         for key in DEFAULT_CONFIG.keys():
             if key in config:
                 self[key] = config[key]
-
-

@@ -2,9 +2,9 @@
 VMWare Fusion headless VM control scripts
 =========================================
 
-This python module contains scripts for OS X to discover and manage
-VMware Fusion virtual machines, escpecially VMs running in headless
-mode that can't be controller directly by VMWare Fusion GUI.
+This python module contains scripts for OS X to discover and manage VMware Fusion
+virtual machines, escpecially VMs running in headless mode that can't be controller
+directly by VMWare Fusion GUI.
 
 Installing
 ----------

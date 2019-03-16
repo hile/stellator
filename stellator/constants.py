@@ -142,14 +142,14 @@ VMX_KEY_MAP = {
 
 # Labels for fields to show in 'details' command
 VMX_DETAILS_DESCRIPTIONS = (
-    ( 'memory',                     'Memory', ' MB', ),
-    ( 'cores',                      'CPUs', ),
-    ( 'guest_os',                   'Guest OS', ),
-    ( 'enable_3d',                  '3D Acceleration', ),
-    ( 'sound_present',              'Soundcard present', ),
-    ( 'virtual_hypervisor_enable',  'Nested Virtualization'),
-    ( 'compatibility_level',        'VM compatibility level', ),
-    ( 'virtual_hw_version',         'VM virtual hardware version', ),
+    ('memory',                     'Memory', ' MB',),
+    ('cores',                      'CPUs',),
+    ('guest_os',                   'Guest OS',),
+    ('enable_3d',                  '3D Acceleration',),
+    ('sound_present',              'Soundcard present',),
+    ('virtual_hypervisor_enable',  'Nested Virtualization'),
+    ('compatibility_level',        'VM compatibility level',),
+    ('virtual_hw_version',         'VM virtual hardware version',),
 )
 
 VMX_DEVICE_BOOLEAN_KEYS = (

@@ -5,10 +5,15 @@ Parser for user's vmware fusion virtual machine inventory
 import fnmatch
 import os
 
-from stellator.constants import *
-from stellator.fileparser import VMWareConfigFileParser, IndexedConfigEntry, FileParserError
-from stellator.virtualmachine import VirtualMachine, VirtualMachineError
-from stellator.vmrun import VMRunWrapper, VMRunError
+from .config import StellatorConfig
+from .constants import (
+    INVENTORY_VM_BOOLEAN_FLAG_KEYS,
+    INVENTORY_VM_INTEGER_KEYS,
+    INVENTORY_VM_KEY_MAP,
+)
+from .fileparser import VMWareConfigFileParser, IndexedConfigEntry
+from .virtualmachine import VirtualMachine, VirtualMachineError
+from .vmrun import VMRunWrapper
 
 
 class InventoryIndexField(IndexedConfigEntry):
@@ -69,13 +74,13 @@ class InventoryIndex(IndexedConfigEntry):
         return self.inventory.find_vmx(self.vmx_path)
 
     def set(self, parts, value):
-        if  parts == ['id']:
+        if parts == ['id']:
             self.vmx_path = value
 
-        elif  parts == ['hostID']:
+        elif parts == ['hostID']:
             self.host_id = value
 
-        elif parts == [ 'field', 'count' ]:
+        elif parts == ['field', 'count']:
             self.field_count = int(value)
 
         elif parts[0][:5] == 'field':
@@ -85,7 +90,7 @@ class InventoryIndex(IndexedConfigEntry):
             field.set(key, value)
 
         else:
-            print self, parts, value
+            print(self, parts, value)
 
 
 class InventoryVirtualMachine(IndexedConfigEntry):
@@ -139,7 +144,7 @@ class InventoryVirtualMachine(IndexedConfigEntry):
             pass
 
         else:
-            print 'unknown key', self, key, value
+            print('unknown key', self, key, value)
 
 
 class Inventory(VMWareConfigFileParser):
@@ -198,8 +203,8 @@ class Inventory(VMWareConfigFileParser):
             try:
                 virtualmachines.append(config.virtualmachine)
             except VirtualMachineError as e:
-                print 'Error loading {0}: {1}'.format(config, e)
-                pass
+                print('Error loading {0}: {1}'.format(config, e))
+
         return virtualmachines
 
     def update_running_vmx(self):
@@ -306,7 +311,7 @@ class VirtualMachineFinder(list):
 
             for pattern in patterns:
                 if case_sensitive:
-                   if fnmatch.fnmatch(virtualmachine.name, pattern):
+                    if fnmatch.fnmatch(virtualmachine.name, pattern):
                         matches.append(virtualmachine)
                         break
                 else:
@@ -322,11 +327,10 @@ class VirtualMachineFinder(list):
         Load virtual machines from directory and inventory
         """
 
-        for root, dirs, files in os.walk(self.path):
+        for root, _dirs, files in os.walk(self.path):
             for filename in files:
                 if os.path.splitext(filename)[1] == '.vmx':
                     self.append(VirtualMachine(self.inventory, os.path.join(root, filename)))
-
 
         for vm in self.inventory.virtualmachines:
             if vm not in self:

@@ -4,7 +4,8 @@ Utility functions
 
 from subprocess import Popen, PIPE
 
-def  arp_resolve_ip_address(mac_address):
+
+def arp_resolve_ip_address(mac_address):
     """ARP lookup
 
     Lookup mac address from ARP table
@@ -21,4 +22,3 @@ def  arp_resolve_ip_address(mac_address):
             return fields[1].strip('()')
 
     return None
-

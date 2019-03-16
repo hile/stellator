@@ -138,28 +138,33 @@ class DetailsCommand(VMWareCommand):
             self.message('')
 
 
-script = Script()
-script.add_argument('--config', default=DEFAULT_CONFIG_PATH, help='Virtual machine directory')
+def main():
+    script = Script()
+    script.add_argument('--config', default=DEFAULT_CONFIG_PATH, help='Virtual machine directory')
 
-c = script.add_subcommand(ListCommand('list', 'List VMs'))
+    c = script.add_subcommand(ListCommand('list', 'List VMs'))
 
-c = script.add_subcommand(StartCommand('start', 'Start VM'))
-c.add_argument('patterns', nargs='*', help='VM name patterns')
+    c = script.add_subcommand(StartCommand('start', 'Start VM'))
+    c.add_argument('patterns', nargs='*', help='VM name patterns')
 
-c = script.add_subcommand(StopCommand('stop', 'Stop VM'))
-c.add_argument('patterns', nargs='*', help='VM name patterns')
+    c = script.add_subcommand(StopCommand('stop', 'Stop VM'))
+    c.add_argument('patterns', nargs='*', help='VM name patterns')
 
-c = script.add_subcommand(AutoResumeCommand('resume', 'Autoresume headless VMs'))
-c.add_argument('patterns', nargs='*', help='VM name patterns')
+    c = script.add_subcommand(AutoResumeCommand('resume', 'Autoresume headless VMs'))
+    c.add_argument('patterns', nargs='*', help='VM name patterns')
 
-c = script.add_subcommand(SuspendCommand('suspend', 'Suspend VM'))
-c.add_argument('--autoresume', action='store_true', help='Set autoresume flag')
-c.add_argument('patterns', nargs='*', help='VM name patterns')
+    c = script.add_subcommand(SuspendCommand('suspend', 'Suspend VM'))
+    c.add_argument('--autoresume', action='store_true', help='Set autoresume flag')
+    c.add_argument('patterns', nargs='*', help='VM name patterns')
 
-c = script.add_subcommand(StatusCommand('status', 'Show status of VMs'))
-c.add_argument('patterns', nargs='*', help='VM name patterns')
+    c = script.add_subcommand(StatusCommand('status', 'Show status of VMs'))
+    c.add_argument('patterns', nargs='*', help='VM name patterns')
 
-c = script.add_subcommand(DetailsCommand('details', 'Show VM details'))
-c.add_argument('patterns', nargs='*', help='VM name patterns')
+    c = script.add_subcommand(DetailsCommand('details', 'Show VM details'))
+    c.add_argument('patterns', nargs='*', help='VM name patterns')
 
-args = script.parse_args()
+    args = script.parse_args()
+
+
+if __name__ == '__main__':
+    main()
