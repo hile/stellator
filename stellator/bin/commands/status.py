@@ -13,8 +13,9 @@ class StatusCommand(VMWareCommand):
         args = self.parse_args(args)
 
         for virtualmachine in args.virtualmachines:
-            self.message('{:20} {:9} {:3} CPUs {:5} MB memory {}'.format(
+            self.message('{:20} {:32} {:9} {:3} CPUs {:5} MB memory {}'.format(
                 virtualmachine.name,
+                virtualmachine.uuid,
                 virtualmachine.status,
                 virtualmachine.cores,
                 virtualmachine.memory,

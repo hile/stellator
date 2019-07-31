@@ -142,6 +142,7 @@ VMX_KEY_MAP = {
 
 # Labels for fields to show in 'details' command
 VMX_DETAILS_DESCRIPTIONS = (
+    ('uuid',                       'UUID'),
     ('memory',                     'Memory', ' MB',),
     ('cores',                      'CPUs',),
     ('guest_os',                   'Guest OS',),

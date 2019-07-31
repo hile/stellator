@@ -223,6 +223,16 @@ class VirtualMachine(VMWareConfigFileParser):
         return self.path >= other.path
 
     @property
+    def uuid(self):
+        uuid = getattr(self, 'uuid_location', None)
+        if uuid is not None:
+            return uuid
+        uuid = getattr(self, 'uuid_bios', None)
+        if uuid is not None:
+            return uuid
+        return None
+
+    @property
     def description(self):
         value = self.annotation
         if value is None:
@@ -405,6 +415,8 @@ class VirtualMachine(VMWareConfigFileParser):
 
         if key in VMX_KEY_MAP:
             key = VMX_KEY_MAP[key]
+            if key in ('uuid_bios', 'uuid_location'):
+                value = ''.join(value.split()).replace('-', '')
             setattr(self, key, value)
 
         else:
@@ -451,8 +463,3 @@ class VirtualMachine(VMWareConfigFileParser):
                     share.set(parts, value)
                 except ValueError as e:
                     print(parts, e)
-
-            else:
-                pass
-                # TODO - parse rest of options: these are not really interesting
-                # print '{}\n  {} {}'.format(key, type(value), value)

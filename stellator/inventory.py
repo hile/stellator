@@ -311,10 +311,16 @@ class VirtualMachineFinder(list):
 
             for pattern in patterns:
                 if case_sensitive:
+                    if fnmatch.fnmatch(virtualname.uuid, pattern):
+                        matches.append(virtualmachine)
+                        break
                     if fnmatch.fnmatch(virtualmachine.name, pattern):
                         matches.append(virtualmachine)
                         break
                 else:
+                    if fnmatch.fnmatch(virtualmachine.uuid.lower(), pattern.lower()):
+                        matches.append(virtualmachine)
+                        break
                     if fnmatch.fnmatch(virtualmachine.name.lower(), pattern.lower()):
                         matches.append(virtualmachine)
                         break
