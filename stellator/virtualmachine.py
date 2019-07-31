@@ -199,7 +199,7 @@ class VirtualMachine(VMWareConfigFileParser):
         try:
             self.load()
         except FileParserError as e:
-            raise VirtualMachineError('Error loading {0}: {1}'.format(self.path, e))
+            raise VirtualMachineError('Error loading {}: {}'.format(self.path, e))
 
     def __repr__(self):
         return self.path
@@ -281,7 +281,7 @@ class VirtualMachine(VMWareConfigFileParser):
 
         If VM is not running and has .vmem files, it is suspended.
         """
-        return len(glob.glob('{0}/*.vmem'.format(self.directory))) > 0
+        return len(glob.glob('{}/*.vmem'.format(self.directory))) > 0
 
     @property
     def status(self):
@@ -297,14 +297,17 @@ class VirtualMachine(VMWareConfigFileParser):
 
         return 'stopped'
 
-    def start(self):
+    def start(self, headless=None):
         """Start VM
 
         """
         if self.is_running:
             return
 
-        self.inventory.vmrun.start(self.path, headless=self.headless)
+        if headless is None:
+            headless = self.headless
+
+        self.inventory.vmrun.start(self.path, headless=headless)
 
         if os.path.isfile(self.autoresume_file):
             try:
@@ -452,4 +455,4 @@ class VirtualMachine(VMWareConfigFileParser):
             else:
                 pass
                 # TODO - parse rest of options: these are not really interesting
-                # print '{0}\n  {1} {2}'.format(key, type(value), value)
+                # print '{}\n  {} {}'.format(key, type(value), value)

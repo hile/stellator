@@ -24,3 +24,14 @@ endif
 register:
 	python setup.py register sdist upload
 
+upload: clean
+	python setup.py sdist bdist_wheel
+	twine upload dist/*
+
+lint:
+	flake8 | sort
+
+test:
+	python setup.py test
+
+.PHONY: test lint

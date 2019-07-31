@@ -5,6 +5,7 @@ build/
 doc/
 dist/
 *.egg-info/
+.pytest_cache/
 .idea/
 .DS_Store
 test/data/*

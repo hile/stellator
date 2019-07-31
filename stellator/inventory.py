@@ -30,7 +30,7 @@ class InventoryIndexField(IndexedConfigEntry):
         self.value = None
 
     def __repr__(self):
-        return '{0} {1} {2}'.format(self.inventory_index, self.name, self.value)
+        return '{} {} {}'.format(self.inventory_index, self.name, self.value)
 
     def set(self, key, value):
         if key == 'default':
@@ -55,7 +55,7 @@ class InventoryIndex(IndexedConfigEntry):
         self.fields = []
 
     def __repr__(self):
-        return '{0} {1} {2}'.format(self.index, self.host_id, self.vmx_path)
+        return '{} {} {}'.format(self.index, self.host_id, self.vmx_path)
 
     def __get_field__(self, index):
         for instance in self.fields:
@@ -111,7 +111,7 @@ class InventoryVirtualMachine(IndexedConfigEntry):
         }
 
     def __repr__(self):
-        return '{0} {1}'.format(self.config['name'], self.vmx_path)
+        return '{} {}'.format(self.config['name'], self.vmx_path)
 
     @property
     def virtualmachine(self):
@@ -203,7 +203,7 @@ class Inventory(VMWareConfigFileParser):
             try:
                 virtualmachines.append(config.virtualmachine)
             except VirtualMachineError as e:
-                print('Error loading {0}: {1}'.format(config, e))
+                print('Error loading {}: {}'.format(config, e))
 
         return virtualmachines
 
